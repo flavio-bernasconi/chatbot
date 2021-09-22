@@ -79,30 +79,38 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         Dialogflow(authGoogle: authGoogle, language: Language.english);
     AIResponse response = await dialogflow.detectIntent(query);
 
-    ChatMessage message = ChatMessage(
-      message: aiResponse.getMessage(),
+    // print(response.queryResult.queryText);
+    // print(response.queryResult.action);
+    print(response.queryResult.parameters);
+    print(response.queryResult.parameters['projectName']);
+    print(response.queryResult.intent.name);
+    print('----------------');
+    // print(response.queryResult.allRequiredParamsPresent);
+    // print(response.queryResult.fulfillmentText);
+    // print(response.queryResult.fulfillmentMessages);
+
     ChatMessages message = ChatMessages(
-      message: response.getMessage(),
-      name: "Bot",
-      isUserMessage: false,
-    );
+        message: response.getMessage(),
+        name: "Bot",
+        isUserMessage: false,
+        key: UniqueKey());
 
     final isProjectNameIntent =
         response.queryResult.parameters.containsKey('projectName');
 
     if (isProjectNameIntent) {
       setState(() {
-        setState(() {
-          _messages.insert(0, message);
-        });
-        _messages.insert(
-            0,
-            ChatMessages(
-                message: '',
-                name: "Bot",
-                isUserMessage: false,
-                typeOfMessage: 'image'));
+        _messages.insert(0, message);
       });
+      // setState(() {
+      //   _messages.insert(
+      //       0,
+      //       ChatMessages(
+      //           message: '',
+      //           name: "Bot",
+      //           isUserMessage: false,
+      //           typeOfMessage: 'image'));
+      // });
     } else {
       setState(() {
         _messages.insert(0, message);
@@ -115,10 +123,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     _inputController.clear();
 
     ChatMessages message = ChatMessages(
-      message: text,
-      name: "User",
-      isUserMessage: true,
-    );
+        message: text, name: "User", isUserMessage: true, key: UniqueKey());
 
     setState(() {
       _messages.insert(0, message);
@@ -141,6 +146,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
           reverse: true,
           itemBuilder: (_, index) => _messages[index],
           itemCount: _messages.length,
+          addAutomaticKeepAlives: true,
         )),
         Divider(height: 1.0),
         Container(

@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
+import 'components/MessageContainer.dart';
 
-class ChatMessages extends StatelessWidget {
+class ChatMessages extends StatefulWidget {
   ChatMessages(
-      {this.message, this.name, this.isUserMessage, this.typeOfMessage});
+      {Key key,
+      this.title,
+      this.message,
+      this.name,
+      this.isUserMessage,
+      this.typeOfMessage})
+      : super(key: key);
 
+  final String title;
   final String message;
   final String name;
   final bool isUserMessage;
   final String typeOfMessage;
 
+  @override
+  _ChatMessages createState() => _ChatMessages();
+}
+
+class _ChatMessages extends State<ChatMessages>
+    with AutomaticKeepAliveClientMixin {
   final Map<String, Color> botAvatarConfig = {
     'color': Colors.white,
     'background': Colors.orange[500]
@@ -62,26 +76,26 @@ class ChatMessages extends StatelessWidget {
     );
   }
 
-  messageContainer(String message) {
-    return Container(
-      constraints: BoxConstraints(
-          minWidth: 100, maxWidth: typeOfMessage != "image" ? 200 : 430),
-      child: typeOfMessage != "image" ? Text(message) : createCarousel(),
-      margin: EdgeInsets.only(top: 5.0),
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(color: Colors.grey[200]),
-    );
-  }
+  // messageContainer(String message) {
+  //   return Container(
+  //     constraints: BoxConstraints(
+  //         minWidth: 100, maxWidth: typeOfMessage != "image" ? 200 : 430),
+  //     child: typeOfMessage != "image" ? Text(message) : createCarousel(),
+  //     margin: EdgeInsets.only(top: 5.0),
+  //     padding: EdgeInsets.all(10.0),
+  //     decoration: BoxDecoration(color: Colors.grey[200]),
+  //   );
+  // }
 
   List<Widget> botMessage() {
     return <Widget>[
-      createAvatar(this.name),
+      createAvatar(widget.name),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(this.name, style: TextStyle(fontWeight: FontWeight.bold)),
-            messageContainer(this.message)
+            Text(widget.name, style: TextStyle(fontWeight: FontWeight.bold)),
+            MessageContainer()
           ],
         ),
       ),
@@ -94,26 +108,31 @@ class ChatMessages extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            Text(this.name,
+            Text(widget.name,
                 style: TextStyle(
                     backgroundColor: Colors.blue[50],
                     fontWeight: FontWeight.bold)),
-            messageContainer(this.message)
+            MessageContainer()
           ],
         ),
       ),
-      createAvatar(this.name, Colors.white, Colors.teal[300]),
+      createAvatar(widget.name, Colors.white, Colors.teal[300]),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.key);
+    super.build(context);
     return Container(
       margin: const EdgeInsets.only(top: 30.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: this.isUserMessage ? myMessage() : botMessage(),
+        children: widget.isUserMessage ? myMessage() : botMessage(),
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
