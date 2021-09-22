@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
+import 'ChatMessages/ChatMessages.dart';
 
 void main() => runApp(MyApp());
 
@@ -33,7 +34,7 @@ class HomePageDialogflow extends StatefulWidget {
 // Chat logic
 // -------------------------------------------
 class _HomePageDialogflow extends State<HomePageDialogflow> {
-  final List<ChatMessage> _messages = <ChatMessage>[];
+  final List<ChatMessages> _messages = <ChatMessages>[];
   final TextEditingController _inputController = TextEditingController();
 
   Widget _inputMessageBar() {
@@ -76,31 +77,53 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         await AuthGoogle(fileJson: "assets/config.json").build();
     Dialogflow dialogflow =
         Dialogflow(authGoogle: authGoogle, language: Language.english);
-    AIResponse aiResponse = await dialogflow.detectIntent(query);
-    print(aiResponse);
+    AIResponse response = await dialogflow.detectIntent(query);
 
     ChatMessage message = ChatMessage(
       message: aiResponse.getMessage(),
+    ChatMessages message = ChatMessages(
+      message: response.getMessage(),
       name: "Bot",
       isUserMessage: false,
     );
-    setState(() {
-      _messages.insert(0, message);
-    });
+
+    final isProjectNameIntent =
+        response.queryResult.parameters.containsKey('projectName');
+
+    if (isProjectNameIntent) {
+      setState(() {
+        setState(() {
+          _messages.insert(0, message);
+        });
+        _messages.insert(
+            0,
+            ChatMessages(
+                message: '',
+                name: "Bot",
+                isUserMessage: false,
+                typeOfMessage: 'image'));
+      });
+    } else {
+      setState(() {
+        _messages.insert(0, message);
+      });
+    }
   }
 
   void _handleSubmit(String text) {
     if (_inputController.text.isEmpty) return print('empty message');
     _inputController.clear();
 
-    ChatMessage message = ChatMessage(
+    ChatMessages message = ChatMessages(
       message: text,
       name: "User",
       isUserMessage: true,
     );
+
     setState(() {
       _messages.insert(0, message);
     });
+
     sendQueryToDialogFlow(text);
   }
 
@@ -125,86 +148,6 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
           child: _inputMessageBar(),
         ),
       ]),
-    );
-  }
-}
-
-class ChatMessage extends StatelessWidget {
-  ChatMessage({this.message, this.name, this.isUserMessage});
-
-  final String message;
-  final String name;
-  final bool isUserMessage;
-
-  final Map<String, Color> botAvatarConfig = {
-    'color': Colors.white,
-    'background': Colors.orange[500]
-  };
-
-  createAvatar(String name, [Color textColor, Color background]) {
-    return Container(
-        margin: const EdgeInsets.all(10.0),
-        child: CircleAvatar(
-            backgroundColor: background ?? botAvatarConfig['background'],
-            child: Text(
-              name[0],
-              style: TextStyle(
-                  color: textColor ?? botAvatarConfig['color'],
-                  fontWeight: FontWeight.bold),
-            )));
-  }
-
-  messageContainer(String message) {
-    return Container(
-      constraints: BoxConstraints(minWidth: 100, maxWidth: 200),
-      child: Text(message),
-      margin: EdgeInsets.only(top: 5.0),
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(color: Colors.grey[200]),
-    );
-  }
-
-  List<Widget> botMessage(context) {
-    return <Widget>[
-      createAvatar(this.name),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(this.name, style: TextStyle(fontWeight: FontWeight.bold)),
-            messageContainer(this.message)
-          ],
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> myMessage(context) {
-    return <Widget>[
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            Text(this.name,
-                style: TextStyle(
-                    backgroundColor: Colors.blue[50],
-                    fontWeight: FontWeight.bold)),
-            messageContainer(this.message)
-          ],
-        ),
-      ),
-      createAvatar(this.name, Colors.white, Colors.teal[300]),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 30.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: this.isUserMessage ? myMessage(context) : botMessage(context),
-      ),
     );
   }
 }
