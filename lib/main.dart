@@ -77,18 +77,16 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         await AuthGoogle(fileJson: "assets/config.json").build();
     Dialogflow dialogflow =
         Dialogflow(authGoogle: authGoogle, language: Language.english);
-    AIResponse response = await dialogflow.detectIntent(query);
+    AIResponse aiResponse = await dialogflow.detectIntent(query);
 
-    ChatMessage message = ChatMessage(
-      message: aiResponse.getMessage(),
     ChatMessages message = ChatMessages(
-      message: response.getMessage(),
+      message: aiResponse.getMessage(),
       name: "Bot",
       isUserMessage: false,
     );
 
     final isProjectNameIntent =
-        response.queryResult.parameters.containsKey('projectName');
+        aiResponse.queryResult.parameters.containsKey('projectName');
 
     if (isProjectNameIntent) {
       setState(() {
