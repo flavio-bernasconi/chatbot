@@ -90,9 +90,9 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
 
     if (isProjectNameIntent) {
       setState(() {
-        setState(() {
-          _messages.insert(0, message);
-        });
+        _messages.insert(0, message);
+      });
+      setState(() {
         _messages.insert(
             0,
             ChatMessages(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'Components/Avatar.dart';
 
 class ChatMessages extends StatelessWidget {
   ChatMessages(
@@ -13,19 +14,6 @@ class ChatMessages extends StatelessWidget {
     'color': Colors.white,
     'background': Colors.orange[500]
   };
-
-  createAvatar(String name, [Color textColor, Color background]) {
-    return Container(
-        margin: const EdgeInsets.all(10.0),
-        child: CircleAvatar(
-            backgroundColor: background ?? botAvatarConfig['background'],
-            child: Text(
-              name[0],
-              style: TextStyle(
-                  color: textColor ?? botAvatarConfig['color'],
-                  fontWeight: FontWeight.bold),
-            )));
-  }
 
   createCarousel() {
     return Center(
@@ -75,7 +63,7 @@ class ChatMessages extends StatelessWidget {
 
   List<Widget> botMessage() {
     return <Widget>[
-      createAvatar(this.name),
+      Avatar(name: this.name),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +90,10 @@ class ChatMessages extends StatelessWidget {
           ],
         ),
       ),
-      createAvatar(this.name, Colors.white, Colors.teal[300]),
+      Avatar(
+          name: this.name,
+          textColor: Colors.white,
+          background: Colors.teal[300]),
     ];
   }
 
