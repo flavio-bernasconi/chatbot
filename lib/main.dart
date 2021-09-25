@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
 import 'ChatMessages/ChatMessages.dart';
+import 'InputMessage/InputBar.dart';
 
 void main() => runApp(MyApp());
 
@@ -36,40 +37,6 @@ class HomePageDialogflow extends StatefulWidget {
 class _HomePageDialogflow extends State<HomePageDialogflow> {
   final List<ChatMessages> _messages = <ChatMessages>[];
   final TextEditingController _inputController = TextEditingController();
-
-  Widget _inputMessageBar() {
-    return IconTheme(
-      data: IconThemeData(color: Theme.of(context).accentColor),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-        margin: EdgeInsets.only(bottom: 10.0),
-        child: Row(
-          children: <Widget>[
-            Flexible(
-              child: TextField(
-                controller: _inputController,
-                onSubmitted: _handleSubmit,
-                decoration:
-                    InputDecoration.collapsed(hintText: "Send a message"),
-              ),
-            ),
-            Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.0),
-                child: Row(children: [
-                  IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () => _handleSubmit(_inputController.text),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.addchart_rounded),
-                    onPressed: () => _handleSubmit(_inputController.text),
-                  )
-                ])),
-          ],
-        ),
-      ),
-    );
-  }
 
   void sendQueryToDialogFlow(query) async {
     _inputController.clear();
@@ -108,7 +75,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     }
   }
 
-  void _handleSubmit(String text) {
+  void handleSubmit(String text) {
     if (_inputController.text.isEmpty) return print('empty message');
     _inputController.clear();
 
@@ -143,7 +110,9 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         Divider(height: 1.0),
         Container(
           decoration: BoxDecoration(color: Colors.white10),
-          child: _inputMessageBar(),
+          child: InputBar(
+              handleSubmit: this.handleSubmit,
+              inputController: this._inputController),
         ),
       ]),
     );
