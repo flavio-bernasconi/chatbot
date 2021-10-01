@@ -11,8 +11,7 @@ class InputBar extends StatelessWidget {
     return IconTheme(
       data: IconThemeData(color: Theme.of(context).accentColor),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-        margin: EdgeInsets.only(bottom: 10.0),
+        padding: EdgeInsets.symmetric(horizontal: 18.0),
         child: Row(
           children: <Widget>[
             Flexible(

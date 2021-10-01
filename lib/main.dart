@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
 import 'ChatMessages/ChatMessages.dart';
-import 'InputMessage/InputBar.dart';
+import 'InputMessage/InputSection.dart';
+import 'package:flutter/foundation.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,12 +32,21 @@ class HomePageDialogflow extends StatefulWidget {
   _HomePageDialogflow createState() => _HomePageDialogflow();
 }
 
+Map<String, String> listKeys = {
+  "projects/mikey-yoiy/agent/intents/8d3692dd-e027-4a55-9aa5-2f9dc38b247b":
+      "restart"
+};
+
 // -------------------------------------------
 // Chat logic
 // -------------------------------------------
 class _HomePageDialogflow extends State<HomePageDialogflow> {
-  final List<ChatMessages> _messages = <ChatMessages>[];
-  final TextEditingController _inputController = TextEditingController();
+  List<ChatMessages> _messages = <ChatMessages>[];
+  TextEditingController _inputController = TextEditingController();
+  String _inputType = '';
+  List _optionsList = [];
+  String intentId = '';
+  Map collectedData = {};
 
   void sendQueryToDialogFlow(query) async {
     _inputController.clear();
@@ -52,32 +62,48 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
       isUserMessage: false,
     );
 
-    final isProjectNameIntent =
-        aiResponse.queryResult.parameters.containsKey('projectName');
+    setState(() {
+      _messages.insert(0, message);
+      intentId = aiResponse.queryResult.intent.name;
+    });
 
-    if (isProjectNameIntent) {
+    if (listKeys[intentId] == "restart") {
       setState(() {
-        _messages.insert(0, message);
+        _messages = [];
+        _inputType = '';
+        _optionsList = [];
+        collectedData = {};
+        intentId = '';
       });
+      return sendQueryToDialogFlow('hi');
+    }
+
+    if (aiResponse.queryResult.parameters.keys.toList().length > 0 == true) {
       setState(() {
-        _messages.insert(
-            0,
-            ChatMessages(
-                message: '',
-                name: "Bot",
-                isUserMessage: false,
-                typeOfMessage: 'image'));
+        collectedData[aiResponse.queryResult.parameters.keys.toList()[0]] =
+            aiResponse.queryResult.parameters.values.toList()[0];
+      });
+    }
+
+    if (aiResponse.getListMessage().length > 1) {
+      final type = aiResponse.getListMessage()[1]["payload"]["type"];
+      final optionsList =
+          aiResponse.getListMessage()[1]["payload"]["listValues"];
+
+      setState(() {
+        _inputType = type;
+        _optionsList = optionsList;
       });
     } else {
       setState(() {
-        _messages.insert(0, message);
+        _inputType = 'text';
       });
     }
   }
 
   void handleSubmit(String text) {
-    if (_inputController.text.isEmpty) return print('empty message');
-    _inputController.clear();
+    if (text.isEmpty) return print('empty message');
+    // print(text);
 
     ChatMessages message = ChatMessages(
       message: text,
@@ -87,9 +113,17 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
 
     setState(() {
       _messages.insert(0, message);
+      _inputType = '';
+      _optionsList = [];
     });
 
     sendQueryToDialogFlow(text);
+  }
+
+  @override
+  void initState() {
+    sendQueryToDialogFlow('hi');
+    super.initState();
   }
 
   @override
@@ -97,7 +131,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Chatbotto"),
+        title: Text("Chat boot"),
       ),
       body: Column(children: <Widget>[
         Flexible(
@@ -107,12 +141,17 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
           itemBuilder: (_, index) => _messages[index],
           itemCount: _messages.length,
         )),
-        Divider(height: 1.0),
         Container(
           decoration: BoxDecoration(color: Colors.white10),
-          child: InputBar(
-              handleSubmit: this.handleSubmit,
-              inputController: this._inputController),
+          child: (this._inputType.isNotEmpty)
+              ? InputSection(
+                  handleSubmit: this.handleSubmit,
+                  inputController: this._inputController,
+                  typeOfMessage: this._inputType,
+                  optionsList: this._optionsList)
+              : LinearProgressIndicator(
+                  minHeight: 20.0,
+                ),
         ),
       ]),
     );
