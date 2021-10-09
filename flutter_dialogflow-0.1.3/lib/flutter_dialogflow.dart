@@ -193,8 +193,6 @@ class AIResponse {
   AIResponse(Map response) {
     this._status = new Status(response["status"]);
     if (this._status.getCode != 200) {
-      print(this._status.getErrorType);
-      print(this._status.getErrorDetails);
       throw new FormatException(this._status.getErrorDetails);
     } else {
       this._id = response["id"];

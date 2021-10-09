@@ -22,8 +22,22 @@ class ChatMessages extends StatelessWidget {
       constraints: BoxConstraints(minWidth: 100, maxWidth: 200),
       child: Text(message),
       margin: EdgeInsets.only(top: 5.0),
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(color: Colors.grey[200]),
+      padding: EdgeInsets.all(15.0),
+      decoration: new BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10.0, // soften the shadow
+            spreadRadius: 5.0, //extend the shadow
+            offset: Offset(
+              4.0, // Move to right 10  horizontally
+              8.0, // Move to bottom 10 Vertically
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -34,7 +48,7 @@ class ChatMessages extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(this.name, style: TextStyle(fontWeight: FontWeight.bold)),
+            // Text(this.name, style: TextStyle(fontWeight: FontWeight.bold)),
             messageContainer()
           ],
         ),
@@ -48,10 +62,10 @@ class ChatMessages extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            Text(this.name,
-                style: TextStyle(
-                    backgroundColor: Colors.blue[50],
-                    fontWeight: FontWeight.bold)),
+            // Text(this.name,
+            //     style: TextStyle(
+            //         backgroundColor: Colors.blue[50],
+            //         fontWeight: FontWeight.bold)),
             messageContainer()
           ],
         ),

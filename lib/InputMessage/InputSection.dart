@@ -1,6 +1,5 @@
-import 'package:chatbot/InputMessage/components/Chips.dart';
-import 'package:chatbot/InputMessage/components/InputBar.dart';
 import 'package:chatbot/InputMessage/components/DatePicker.dart';
+import 'package:chatbot/InputMessage/components/Recap.dart';
 import 'package:chatbot/InputMessage/components/SeatPicker.dart';
 import 'package:flutter/material.dart';
 
@@ -8,36 +7,65 @@ class InputSection extends StatelessWidget {
   const InputSection(
       {Key key,
       this.typeOfMessage,
-      this.optionsList,
+      this.currentOption,
       this.handleSubmit,
-      this.inputController})
+      this.inputController,
+      this.scrollController,
+      this.collectedData})
       : super(key: key);
 
   final String typeOfMessage;
-  final List optionsList;
+  final Map currentOption;
   final Function handleSubmit;
   final TextEditingController inputController;
+  final Map collectedData;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
-    double height = 70.0;
     Widget child;
 
-    if (typeOfMessage == 'chips') {
-      height = 280.0;
-      child = CustomChips(optionsList: optionsList, handleSubmit: handleSubmit);
-    } else if (typeOfMessage == 'date') {
-      height = 280.0;
+    if (typeOfMessage == 'date') {
       child = DatePicker(
         handleSubmit: this.handleSubmit,
       );
     } else if (typeOfMessage == 'grid') {
-      height = 480.0;
       child = SeatPicker(
+          handleSubmit: this.handleSubmit,
+          scrollController: this.scrollController);
+    } else if (typeOfMessage == 'chips') {
+      return child = Container(
+        decoration: new BoxDecoration(
+          color: Colors.blue[100],
+          borderRadius: BorderRadius.all(Radius.circular(45)),
+        ),
+        margin: EdgeInsets.only(bottom: 5),
+        child: ListTile(
+            title: Text(currentOption["label"]),
+            leading: FlutterLogo(),
+            onTap: () {
+              print(currentOption);
+              handleSubmit(currentOption["id"]);
+            }),
+      );
+
+      // child = ListView.builder(
+      //     padding: EdgeInsets.symmetric(vertical: 15.0),
+      //     itemCount: optionsList.length,
+      //     itemBuilder: (BuildContext ctxt, int index) {
+      //       return Container(
+      //           padding: EdgeInsets.all(12.0),
+      //           child: CustomChip(
+      //             option: optionsList[index],
+      //             handleSubmit: this.handleSubmit,
+      //           ));
+      //     });
+    } else if (typeOfMessage == 'confirm') {
+      child = Recap(
+        collectedData: this.collectedData,
         handleSubmit: this.handleSubmit,
       );
     } else {
-      height = 110.0;
       child = ElevatedButton(
           style: ElevatedButton.styleFrom(
             minimumSize: Size(
@@ -47,35 +75,6 @@ class InputSection extends StatelessWidget {
           onPressed: () => this.handleSubmit('restart'));
     }
 
-    return Container(
-      height: height,
-      alignment: Alignment.topCenter,
-      decoration: new BoxDecoration(
-          color: Colors.teal[50],
-          borderRadius: new BorderRadius.only(
-            topLeft: const Radius.circular(40.0),
-            topRight: const Radius.circular(40.0),
-          )),
-      child: Container(
-        height: height,
-        alignment: Alignment.center,
-        child: child,
-      ),
-    );
+    return child;
   }
 }
-
-// else if (typeOfMessage == 'chips2') {
-//       child = ListView(
-//           scrollDirection: Axis.horizontal,
-//           children: optionsList
-//               .map((option) => Container(
-//                   margin: const EdgeInsets.symmetric(horizontal: 10.0),
-//                   child: CustomChip(
-//                     id: option["id"],
-//                     handleSubmit: this.handleSubmit,
-//                     label: option["label"],
-//                     color: Color(0xFFff6666),
-//                   )))
-//               .toList());
-//     }

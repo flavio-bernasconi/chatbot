@@ -43,10 +43,29 @@ Map<String, String> listKeys = {
 class _HomePageDialogflow extends State<HomePageDialogflow> {
   List<ChatMessages> _messages = <ChatMessages>[];
   TextEditingController _inputController = TextEditingController();
+  GlobalKey<AnimatedListState> _key = GlobalKey();
+
   String _inputType = '';
   List _optionsList = [];
   String intentId = '';
   Map collectedData = {};
+
+  void resetState() {
+    setState(() {
+      _messages = [];
+      _inputType = '';
+      _optionsList = [];
+      collectedData = {};
+      intentId = '';
+      _key = GlobalKey();
+    });
+    return sendQueryToDialogFlow('hi');
+  }
+
+  void addAnimatedMessage() {
+    _key.currentState.insertItem(_messages.length - 1,
+        duration: Duration(milliseconds: 600));
+  }
 
   void sendQueryToDialogFlow(query) async {
     _inputController.clear();
@@ -63,22 +82,17 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     );
 
     setState(() {
-      _messages.insert(0, message);
+      _messages.insert(_messages.length, message);
       intentId = aiResponse.queryResult.intent.name;
     });
+    addAnimatedMessage();
 
     if (listKeys[intentId] == "restart") {
-      setState(() {
-        _messages = [];
-        _inputType = '';
-        _optionsList = [];
-        collectedData = {};
-        intentId = '';
-      });
-      return sendQueryToDialogFlow('hi');
+      resetState();
     }
 
     if (aiResponse.queryResult.parameters.keys.toList().length > 0 == true) {
+      //TODO use map add all parameters
       setState(() {
         collectedData[aiResponse.queryResult.parameters.keys.toList()[0]] =
             aiResponse.queryResult.parameters.values.toList()[0];
@@ -94,16 +108,25 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         _inputType = type;
         _optionsList = optionsList;
       });
-    } else {
-      setState(() {
-        _inputType = 'text';
-      });
+    }
+
+    if (aiResponse.queryResult.intent.endInteraction) {
+      _inputType = 'confirm';
+      _optionsList = null;
+    }
+
+    if (_inputType.isEmpty) {
+      _inputType = 'restart';
     }
   }
 
-  void handleSubmit(String text) {
-    if (text.isEmpty) return print('empty message');
-    // print(text);
+  void handleSubmit(String text, [String url]) {
+    if (text.isEmpty && url == null) return print('empty message');
+
+    if (url != null && url.isNotEmpty) {
+      print(url);
+      return resetState();
+    }
 
     ChatMessages message = ChatMessages(
       message: text,
@@ -112,11 +135,11 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     );
 
     setState(() {
-      _messages.insert(0, message);
+      _messages.insert(_messages.length, message);
       _inputType = '';
       _optionsList = [];
     });
-
+    addAnimatedMessage();
     sendQueryToDialogFlow(text);
   }
 
@@ -129,31 +152,106 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD8D8D8),
       appBar: AppBar(
         centerTitle: true,
         title: Text("Chat boot"),
       ),
-      body: Column(children: <Widget>[
-        Flexible(
-            child: ListView.builder(
-          padding: EdgeInsets.all(8.0),
-          reverse: true,
-          itemBuilder: (_, index) => _messages[index],
-          itemCount: _messages.length,
-        )),
-        Container(
-          decoration: BoxDecoration(color: Colors.white10),
-          child: (this._inputType.isNotEmpty)
-              ? InputSection(
-                  handleSubmit: this.handleSubmit,
-                  inputController: this._inputController,
-                  typeOfMessage: this._inputType,
-                  optionsList: this._optionsList)
-              : LinearProgressIndicator(
-                  minHeight: 20.0,
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.refresh_rounded),
+          elevation: 5,
+          backgroundColor: Colors.deepOrange,
+          foregroundColor: Colors.white,
+          onPressed: () => handleSubmit('restart')),
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            bottom: 70,
+            left: 0,
+            right: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              child: AnimatedList(
+                key: _key,
+                padding: EdgeInsets.fromLTRB(8.0, 20, 8, 50),
+                // reverse: true,
+                itemBuilder: (_, index, animation) => SlideTransition(
+                  key: UniqueKey(),
+                  position: Tween<Offset>(
+                    begin: Offset(index.isEven ? -1 : 1, 0),
+                    end: Offset(0, 0),
+                  ).animate(animation),
+                  child: _messages[index],
                 ),
-        ),
-      ]),
+                initialItemCount: 0,
+              ),
+            ),
+          ),
+          DraggableScrollableSheet(
+            maxChildSize: 0.5,
+            initialChildSize: 0.3,
+            minChildSize: 0.1,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                  height: 0.3,
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  decoration: new BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: new BorderRadius.only(
+                      topLeft: const Radius.circular(40.0),
+                      topRight: const Radius.circular(40.0),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10.0, // soften the shadow
+                        spreadRadius: 25.0, //extend the shadow
+                        offset: Offset(
+                          0,
+                          19.0,
+                        ),
+                      )
+                    ],
+                  ),
+                  child: (this._inputType.isNotEmpty)
+                      ? _optionsList != null
+                          ? ListView.builder(
+                              controller: scrollController,
+                              itemCount: _optionsList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  // decoration: BoxDecoration(color: Colors.red),
+                                  child: InputSection(
+                                      handleSubmit: this.handleSubmit,
+                                      inputController: this._inputController,
+                                      typeOfMessage: this._inputType,
+                                      currentOption: this._optionsList[index]),
+                                );
+                              })
+                          : SingleChildScrollView(
+                              controller: scrollController,
+                              child: InputSection(
+                                  handleSubmit: this.handleSubmit,
+                                  inputController: this._inputController,
+                                  typeOfMessage: this._inputType,
+                                  scrollController: scrollController,
+                                  collectedData: this.collectedData))
+                      : Container(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ));
+            },
+          )
+        ],
+      ),
     );
   }
 }
+
+// InputSection(
+//                   handleSubmit: this.handleSubmit,
+//                   inputController: this._inputController,
+//                   typeOfMessage: this._inputType,
+//                   optionsList: this._optionsList)
