@@ -93,6 +93,8 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
 
     if (aiResponse.queryResult.parameters.keys.toList().length > 0 == true) {
       //TODO use map add all parameters
+      print(aiResponse.queryResult.parameters.keys);
+      print(aiResponse.queryResult.parameters.values);
       setState(() {
         collectedData[aiResponse.queryResult.parameters.keys.toList()[0]] =
             aiResponse.queryResult.parameters.values.toList()[0];
@@ -120,16 +122,12 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
     }
   }
 
-  void handleSubmit(String text, [String url]) {
-    if (text.isEmpty && url == null) return print('empty message');
-
-    if (url != null && url.isNotEmpty) {
-      print(url);
-      return resetState();
-    }
+  void handleSubmit(String textForDialogFlow, [String textMessage]) {
+    if (textForDialogFlow.isEmpty && textMessage == null)
+      return print('empty message');
 
     ChatMessages message = ChatMessages(
-      message: text,
+      message: textMessage ?? textForDialogFlow,
       name: "User",
       isUserMessage: true,
     );
@@ -140,7 +138,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
       _optionsList = [];
     });
     addAnimatedMessage();
-    sendQueryToDialogFlow(text);
+    sendQueryToDialogFlow(textForDialogFlow);
   }
 
   @override
@@ -152,7 +150,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD8D8D8),
+      backgroundColor: const Color(0xFFF1F1F1),
       appBar: AppBar(
         centerTitle: true,
         title: Text("Chat boot"),

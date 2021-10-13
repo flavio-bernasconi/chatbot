@@ -47,7 +47,8 @@ class _SeatPickerState extends State<SeatPicker> {
                       50), // double.infinity is the width and 30 is the height
                 ),
                 child: Text('Selected workstation $selectedSeat'),
-                onPressed: () => widget.handleSubmit(selectedSeat.toString())),
+                onPressed: () => widget.handleSubmit(selectedSeat.toString(),
+                    'Seat number ${selectedSeat.toString()}')),
             Container(
                 width: 80.0,
                 child: TextField(

@@ -45,21 +45,9 @@ class InputSection extends StatelessWidget {
             leading: FlutterLogo(),
             onTap: () {
               print(currentOption);
-              handleSubmit(currentOption["id"]);
+              handleSubmit(currentOption["id"], currentOption["label"]);
             }),
       );
-
-      // child = ListView.builder(
-      //     padding: EdgeInsets.symmetric(vertical: 15.0),
-      //     itemCount: optionsList.length,
-      //     itemBuilder: (BuildContext ctxt, int index) {
-      //       return Container(
-      //           padding: EdgeInsets.all(12.0),
-      //           child: CustomChip(
-      //             option: optionsList[index],
-      //             handleSubmit: this.handleSubmit,
-      //           ));
-      //     });
     } else if (typeOfMessage == 'confirm') {
       child = Recap(
         collectedData: this.collectedData,

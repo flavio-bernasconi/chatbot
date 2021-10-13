@@ -11,10 +11,6 @@ class CustomChip extends StatelessWidget {
     return ActionChip(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         labelPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-        // avatar: CircleAvatar(
-        //   backgroundColor: Colors.white70,
-        //   child: Text(option["label"][0].toUpperCase()),
-        // ),
         label: Text(
           option["label"],
           style: TextStyle(
@@ -26,7 +22,7 @@ class CustomChip extends StatelessWidget {
         shadowColor: Colors.grey[60],
         padding: EdgeInsets.all(8.0),
         onPressed: () {
-          handleSubmit(option["id"]);
+          handleSubmit(option["id"], option["label"]);
         });
   }
 }
