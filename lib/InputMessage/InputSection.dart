@@ -30,16 +30,26 @@ class InputSection extends StatelessWidget {
         handleSubmit: this.handleSubmit,
       );
     } else if (typeOfMessage == 'grid') {
-      child = SeatPicker(
-          handleSubmit: this.handleSubmit,
-          scrollController: this.scrollController);
+      child = SeatPicker(handleSubmit: this.handleSubmit);
     } else if (typeOfMessage == 'chips') {
       return child = Container(
+        height: 50,
         decoration: new BoxDecoration(
-          color: Colors.blue[100],
-          borderRadius: BorderRadius.all(Radius.circular(45)),
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.indigo[50],
+              blurRadius: 10.0, // soften the shadow
+              spreadRadius: 5.0, //extend the shadow
+              offset: Offset(
+                1.0, // Move to right 10  horizontally
+                8.0, // Move to bottom 10 Vertically
+              ),
+            )
+          ],
         ),
-        margin: EdgeInsets.only(bottom: 5),
+        margin: EdgeInsets.only(bottom: 9),
         child: ListTile(
             title: Text(currentOption["label"]),
             leading: FlutterLogo(),
@@ -48,7 +58,7 @@ class InputSection extends StatelessWidget {
               handleSubmit(currentOption["id"], currentOption["label"]);
             }),
       );
-    } else if (typeOfMessage == 'confirm') {
+    } else if (typeOfMessage == 'endInteraction') {
       child = Recap(
         collectedData: this.collectedData,
         handleSubmit: this.handleSubmit,

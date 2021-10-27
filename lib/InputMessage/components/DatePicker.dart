@@ -30,18 +30,46 @@ class _DatePickerState extends State<DatePicker> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text("${selectedDate.toLocal()}".split(' ')[0]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.calendar_today,
+                ),
+                iconSize: 34,
+                color: Colors.grey[700],
+                onPressed: () => _selectDate(context),
+              ),
+              InkWell(
+                child: Text("${selectedDate.toLocal()}".split(' ')[0],
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 40)),
+                onTap: () => _selectDate(context),
+              ),
+            ],
+          ),
           SizedBox(
             height: 20.0,
           ),
-          ElevatedButton(
-            onPressed: () => _selectDate(context),
-            child: Text('Select date'),
-          ),
-          ElevatedButton(
-            onPressed: () =>
-                widget.handleSubmit(selectedDate.toString().substring(0, 10)),
-            child: Text('Confirm Date'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => widget
+                    .handleSubmit(selectedDate.toString().substring(0, 10)),
+                child: Text('Confirm Date'),
+                style: ElevatedButton.styleFrom(
+                    primary: Colors.indigo[400],
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    textStyle: TextStyle(
+                        fontSize: 15,
+                        color: Colors.black,
+                        fontWeight: FontWeight.normal)),
+              ),
+            ],
           )
         ],
       ),

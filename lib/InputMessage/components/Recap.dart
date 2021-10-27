@@ -44,7 +44,10 @@ class Recap extends StatelessWidget {
                   onPressed: () => this.handleSubmit('restart')),
               ElevatedButton(
                   child: Text('Confirm'),
-                  onPressed: () => this.handleSubmit('', 'url-save-data'))
+                  onPressed: () {
+                    print('url-save-data then restart');
+                    this.handleSubmit('restart');
+                  })
             ],
           ),
         )
