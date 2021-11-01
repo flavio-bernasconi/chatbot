@@ -27,84 +27,129 @@ class _SeatPickerState extends State<SeatPicker> {
         200,
         (index) => {
               "id": index,
-              "name": index.toString(),
+              "name": (index + 1).toString(),
               "isAvailable": !_notAvailableSeats.contains(index),
+              "isEmptySpace": false,
             }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Expanded(
-                child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 7,
-                        childAspectRatio: 1,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10),
-                    itemCount: locationSeats.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return InkWell(
-                        onTap: () {
-                          if (locationSeats[index]["isAvailable"]) {
-                            setState(() {
-                              selectedSeat = index;
-                            });
-                          }
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: Text(locationSeats[index]["name"]),
-                          decoration: BoxDecoration(
-                              color: locationSeats[index]["id"] == selectedSeat
-                                  ? Colors.amber
+    return Column(
+      children: [
+        Legend(),
+        SizedBox(height: 25),
+        SizedBox(
+          height: 25,
+          width: double.infinity,
+          child: Center(
+            child: Text('Selected seat: ${selectedSeat.toString()}',
+                style: TextStyle(
+                    fontSize: 25,
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w500)),
+          ),
+        ),
+        SizedBox(height: 25),
+        SizedBox(
+            height: 240,
+            child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10),
+                itemCount: locationSeats.length,
+                itemBuilder: (BuildContext ctx, index) {
+                  return InkWell(
+                    onTap: () {
+                      if (locationSeats[index]["isAvailable"] &&
+                          !locationSeats[index]["isEmptySpace"]) {
+                        setState(() {
+                          selectedSeat = index;
+                        });
+                      }
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(locationSeats[index]["id"] == selectedSeat
+                          ? locationSeats[index]["name"]
+                          : ''),
+                      decoration: BoxDecoration(
+                          color: locationSeats[index]["id"] == selectedSeat
+                              ? Colors.amber
+                              : locationSeats[index]["isEmptySpace"]
+                                  ? Colors.grey[100]
                                   : locationSeats[index]["isAvailable"]
                                       ? Colors.blue[100]
                                       : Colors.grey,
-                              borderRadius: BorderRadius.circular(15)),
-                        ),
-                      );
-                    })),
-            Container(
-                height: 50,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(250,
-                              50), // double.infinity is the width and 30 is the height
-                        ),
-                        child: Text('Selected workstation $selectedSeat'),
-                        onPressed: () =>
-                            widget.handleSubmit(selectedSeat.toString())),
-                    Container(
-                        width: 80.0,
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              if (value.isEmpty) {
-                                return selectedSeat = 1;
-                              }
-                              if (int.parse(value) < limitSeats) {
-                                selectedSeat = int.parse(value);
-                              } else {
-                                selectedSeat = limitSeats;
-                              }
-                            });
-                          },
-                          style: TextStyle(color: Colors.blue),
-                          decoration: InputDecoration(
-                              hintText: 'Type here...',
-                              fillColor: Colors.white,
-                              filled: true),
-                        ))
-                  ],
-                ))
-          ],
-        ));
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  );
+                })),
+        SizedBox(
+          height: 20,
+        ),
+        SizedBox(
+          height: 50,
+          width: double.infinity,
+          child: ElevatedButton(
+            child: Text('Selected seat: ${selectedSeat.toString()}'),
+            onPressed: () => widget.handleSubmit(selectedSeat.toString(),
+                "Selected seat: ${selectedSeat.toString()}"),
+          ),
+        ),
+        SizedBox(
+          height: 35,
+        ),
+      ],
+    );
+  }
+}
+
+class Legend extends StatelessWidget {
+  const Legend({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        LegendItem(
+          color: Colors.amber,
+          text: 'selected',
+        ),
+        LegendItem(
+          color: Colors.blue[100],
+          text: 'available',
+        ),
+        LegendItem(
+          color: Colors.grey,
+          text: 'unavailable',
+        ),
+      ],
+    );
+  }
+}
+
+class LegendItem extends StatelessWidget {
+  LegendItem({this.color, this.text});
+
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+            height: 15.0,
+            width: 15.0,
+            margin: EdgeInsets.only(right: 8.0),
+            decoration: BoxDecoration(
+                color: color, borderRadius: BorderRadius.circular(4))),
+        Text(text)
+      ],
+    );
   }
 }

@@ -1,6 +1,5 @@
-import 'package:chatbot/InputMessage/components/Chips.dart';
-import 'package:chatbot/InputMessage/components/InputBar.dart';
 import 'package:chatbot/InputMessage/components/DatePicker.dart';
+import 'package:chatbot/InputMessage/components/Recap.dart';
 import 'package:chatbot/InputMessage/components/SeatPicker.dart';
 import 'package:flutter/material.dart';
 
@@ -8,36 +7,63 @@ class InputSection extends StatelessWidget {
   const InputSection(
       {Key key,
       this.typeOfMessage,
-      this.optionsList,
+      this.currentOption,
       this.handleSubmit,
-      this.inputController})
+      this.inputController,
+      this.scrollController,
+      this.collectedData})
       : super(key: key);
 
   final String typeOfMessage;
-  final List optionsList;
+  final Map currentOption;
   final Function handleSubmit;
   final TextEditingController inputController;
+  final Map collectedData;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
-    double height = 70.0;
     Widget child;
 
-    if (typeOfMessage == 'chips') {
-      height = 280.0;
-      child = CustomChips(optionsList: optionsList, handleSubmit: handleSubmit);
-    } else if (typeOfMessage == 'date') {
-      height = 280.0;
+    if (typeOfMessage == 'date') {
       child = DatePicker(
         handleSubmit: this.handleSubmit,
       );
     } else if (typeOfMessage == 'grid') {
-      height = 480.0;
-      child = SeatPicker(
+      child = SeatPicker(handleSubmit: this.handleSubmit);
+    } else if (typeOfMessage == 'chips') {
+      return child = Container(
+        height: 50,
+        decoration: new BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.indigo[50],
+              blurRadius: 10.0, // soften the shadow
+              spreadRadius: 5.0, //extend the shadow
+              offset: Offset(
+                1.0, // Move to right 10  horizontally
+                8.0, // Move to bottom 10 Vertically
+              ),
+            )
+          ],
+        ),
+        margin: EdgeInsets.only(bottom: 9),
+        child: ListTile(
+            title: Text(currentOption["label"]),
+            leading: FlutterLogo(),
+            onTap: () {
+              handleSubmit(
+                  currentOption["id"], "I'd like to ${currentOption["label"]}");
+            }),
+      );
+    } else if (typeOfMessage == 'endInteraction') {
+      child = Recap(
+        collectedData: this.collectedData,
         handleSubmit: this.handleSubmit,
       );
     } else {
-      height = 110.0;
       child = ElevatedButton(
           style: ElevatedButton.styleFrom(
             minimumSize: Size(
@@ -47,35 +73,6 @@ class InputSection extends StatelessWidget {
           onPressed: () => this.handleSubmit('restart'));
     }
 
-    return Container(
-      height: height,
-      alignment: Alignment.topCenter,
-      decoration: new BoxDecoration(
-          color: Colors.teal[50],
-          borderRadius: new BorderRadius.only(
-            topLeft: const Radius.circular(40.0),
-            topRight: const Radius.circular(40.0),
-          )),
-      child: Container(
-        height: height,
-        alignment: Alignment.center,
-        child: child,
-      ),
-    );
+    return child;
   }
 }
-
-// else if (typeOfMessage == 'chips2') {
-//       child = ListView(
-//           scrollDirection: Axis.horizontal,
-//           children: optionsList
-//               .map((option) => Container(
-//                   margin: const EdgeInsets.symmetric(horizontal: 10.0),
-//                   child: CustomChip(
-//                     id: option["id"],
-//                     handleSubmit: this.handleSubmit,
-//                     label: option["label"],
-//                     color: Color(0xFFff6666),
-//                   )))
-//               .toList());
-//     }
