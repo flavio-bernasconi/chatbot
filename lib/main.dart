@@ -32,11 +32,6 @@ class HomePageDialogflow extends StatefulWidget {
   _HomePageDialogflow createState() => _HomePageDialogflow();
 }
 
-Map<String, String> listKeys = {
-  "projects/mikey-yoiy/agent/intents/8d3692dd-e027-4a55-9aa5-2f9dc38b247b":
-      "restart"
-};
-
 // -------------------------------------------
 // Chat logic
 // -------------------------------------------
@@ -77,6 +72,41 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
         Dialogflow(authGoogle: authGoogle, language: Language.english);
     AIResponse aiResponse = await dialogflow.detectIntent(query);
 
+    if (_inputType.isEmpty) {
+      _inputType = 'restart';
+    }
+
+    if (query == "restart") {
+      return resetState();
+    }
+
+    if (aiResponse.getListMessage().length > 1) {
+      final type = aiResponse.getListMessage()[1]["payload"]["type"];
+      final optionsList =
+          aiResponse.getListMessage()[1]["payload"]["listValues"];
+      final intro = aiResponse.getListMessage()[1]["payload"]["intro"];
+
+      setState(() {
+        _inputType = type;
+        _optionsList = optionsList;
+        introText = intro;
+      });
+    }
+
+    if (aiResponse.queryResult.parameters.keys.toList().length > 0 == true) {
+      //TODO use map add all parameters
+      setState(() {
+        collectedData[aiResponse.queryResult.parameters.keys.toList()[0]] =
+            aiResponse.queryResult.parameters.values.toList()[0];
+      });
+    }
+
+    if (aiResponse.queryResult.intent.endInteraction) {
+      _inputType = 'endInteraction';
+      _optionsList = null;
+      return;
+    }
+
     ChatMessages message = ChatMessages(
       message: aiResponse.getMessage(),
       name: "Bot",
@@ -100,43 +130,6 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
       duration: Duration(seconds: 1),
       curve: Curves.fastOutSlowIn,
     );
-
-    if (listKeys[intentId] == "restart") {
-      resetState();
-    }
-
-    if (aiResponse.queryResult.parameters.keys.toList().length > 0 == true) {
-      //TODO use map add all parameters
-      print(aiResponse.queryResult.parameters.keys);
-      print(aiResponse.queryResult.parameters.values);
-      setState(() {
-        collectedData[aiResponse.queryResult.parameters.keys.toList()[0]] =
-            aiResponse.queryResult.parameters.values.toList()[0];
-      });
-    }
-
-    if (aiResponse.getListMessage().length > 1) {
-      final type = aiResponse.getListMessage()[1]["payload"]["type"];
-      final optionsList =
-          aiResponse.getListMessage()[1]["payload"]["listValues"];
-      final intro = aiResponse.getListMessage()[1]["payload"]["intro"] ??
-          'Choose an option:';
-
-      setState(() {
-        _inputType = type;
-        _optionsList = optionsList;
-        introText = intro;
-      });
-    }
-
-    if (aiResponse.queryResult.intent.endInteraction) {
-      _inputType = 'endInteraction';
-      _optionsList = null;
-    }
-
-    if (_inputType.isEmpty) {
-      _inputType = 'restart';
-    }
   }
 
   void handleSubmit(String textForDialogFlow, [String textMessage]) {
@@ -148,19 +141,22 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
       name: "User",
       isUserMessage: true,
     );
+    if (textForDialogFlow != 'restart') {
+      setState(() {
+        _messages.insert(_messages.length, message);
+        _inputType = '';
+        _optionsList = [];
+      });
+      addAnimatedMessage();
+    }
 
-    setState(() {
-      _messages.insert(_messages.length, message);
-      _inputType = '';
-      _optionsList = [];
-    });
-    addAnimatedMessage();
     sendQueryToDialogFlow(textForDialogFlow);
   }
 
   @override
   void initState() {
     sendQueryToDialogFlow('hi');
+    introText = 'Choose an option:';
     super.initState();
   }
 
@@ -224,7 +220,10 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
                         child: Card(
                           elevation: 12.0,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24)),
+                              borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(24),
+                            topLeft: Radius.circular(24),
+                          )),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
@@ -265,14 +264,7 @@ class _HomePageDialogflow extends State<HomePageDialogflow> {
                                                     collectedData:
                                                         this.collectedData)
                                               ]
-                                        : [
-                                            Container(
-                                              child: Center(
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              ),
-                                            )
-                                          ],
+                                        : [Loader()],
                                   ),
                                 ],
                               ),
@@ -319,6 +311,19 @@ class CustomTitleList extends StatelessWidget {
               color: Colors.grey[200], borderRadius: BorderRadius.circular(16)),
         ),
       ],
+    );
+  }
+}
+
+class Loader extends StatelessWidget {
+  const Loader({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

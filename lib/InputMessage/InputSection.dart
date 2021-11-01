@@ -54,8 +54,8 @@ class InputSection extends StatelessWidget {
             title: Text(currentOption["label"]),
             leading: FlutterLogo(),
             onTap: () {
-              print(currentOption);
-              handleSubmit(currentOption["id"], currentOption["label"]);
+              handleSubmit(
+                  currentOption["id"], "I'd like to ${currentOption["label"]}");
             }),
       );
     } else if (typeOfMessage == 'endInteraction') {
