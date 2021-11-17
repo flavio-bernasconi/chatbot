@@ -19,7 +19,7 @@ class ChatMessages extends StatelessWidget {
 
   messageContainer() {
     return Container(
-      constraints: BoxConstraints(minWidth: 100, maxWidth: 200),
+      constraints: BoxConstraints(minWidth: 100, maxWidth: 240),
       child: Text(message),
       margin: EdgeInsets.only(top: 5.0),
       padding: EdgeInsets.all(15.0),
@@ -27,8 +27,8 @@ class ChatMessages extends StatelessWidget {
         color: Colors.white,
         // borderRadius: BorderRadius.all(Radius.circular(10)),
         borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(0),
-            topRight: Radius.circular(13),
+            topLeft: Radius.circular(!isUserMessage ? 0 : 13),
+            topRight: Radius.circular(isUserMessage ? 0 : 13),
             bottomLeft: Radius.circular(13),
             bottomRight: Radius.circular(13)),
         boxShadow: [

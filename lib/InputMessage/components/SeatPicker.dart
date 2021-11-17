@@ -40,10 +40,10 @@ class _SeatPickerState extends State<SeatPicker> {
         Legend(),
         SizedBox(height: 25),
         SizedBox(
-          height: 25,
+          height: 45,
           width: double.infinity,
           child: Center(
-            child: Text('Selected seat: ${selectedSeat.toString()}',
+            child: Text('Selected seat: ${(selectedSeat + 1).toString()}',
                 style: TextStyle(
                     fontSize: 25,
                     color: Colors.black45,
@@ -94,7 +94,7 @@ class _SeatPickerState extends State<SeatPicker> {
           height: 50,
           width: double.infinity,
           child: ElevatedButton(
-            child: Text('Selected seat: ${selectedSeat.toString()}'),
+            child: Text('Selected seat: ${(selectedSeat + 1).toString()}'),
             onPressed: () => widget.handleSubmit(selectedSeat.toString(),
                 "Selected seat: ${selectedSeat.toString()}"),
           ),
